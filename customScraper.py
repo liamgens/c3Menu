@@ -1,10 +1,8 @@
 import requests
 from BeautifulSoup import BeautifulSoup
-from pushetta import Pushetta
+import boto3
 
-API_KEY = "464a8af42f2c4226dea589e8d7aff8e7a5dd8756"
-
-response = requests.get('https://myubcard.com/dining/menu?date=1475088175')
+response = requests.get('https://myubcard.com/dining/menu')
 html = response.content
 soup = BeautifulSoup(html)
 menuDiv = soup.find('div', attrs={'id': 'menu-56-dinner'})
@@ -16,3 +14,6 @@ for ul in menuDiv.find('ul'):
     for li in ul.findAll('li', attrs={'class': 'item-li dinner-border'}):
         print li.text
         listOfDinner.append(li.text)
+
+publishAmazonSnsMsg('Dinner', 'arn:aws:sns:us-west-2:152022601810:C3_Menu',
+                    'Ass for Days', 'AKIAI4X4J46SHFPQ6QWQ', 'vafJzXS9xmPmV8T6P/jZVYVhtra7acRC3EOdpRLE')
