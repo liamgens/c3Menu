@@ -4,10 +4,8 @@ import boto3
 import time
 import datetime
 
-# TODO add the date in the heading
 # TODO set an automatic time to run
-# TODO add multiple dining centers
-# TODO add headings
+# TODO add multiple dining centers5
 
 
 def dayOfWeek(day):
@@ -30,12 +28,13 @@ html = response.content
 soup = BeautifulSoup(html)
 menuDiv = soup.find('div', attrs={'id': 'menu-56-dinner'})
 
-menu = '\n\nTonight, ' + dayOfWeek(datetime.datetime.today().weekday()) + ' ' + \
-    time.strftime("%m/%d") + ' @ C3\n'
+menu = '\nTonight, ' + dayOfWeek(datetime.datetime.today().weekday()) + ' ' + \
+    time.strftime("%m/%d") + ' @ C3\n\n'
 
 for ul in menuDiv.find('ul'):
     for li in ul.findAll('li', attrs={'class': 'item-li dinner-border'}):
         menu += '-' + li.text + '\n'
-menu += '\n' + time.strftime("%m/%d/%Y") + ' ' + time.strftime("%I:%M:%S %p")
+menu += '\nText "STOP" to unsubscribe\n' + \
+    time.strftime("%m/%d/%Y") + ' ' + time.strftime("%I:%M:%S %p")
 print menu
 sns.publish(TopicArn=arn, Message=menu)
