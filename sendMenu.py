@@ -6,7 +6,6 @@ import datetime
 
 # TODO set an automatic time to run
 # TODO Notifications for certain food
-# TODO Heading for Premier Entree
 # TODO Someone signs up after 4pm
 # TODO Switch to new service -- Request Days
 
@@ -51,6 +50,18 @@ def locationSelect(location):
     return switcher.get(location, 'C3')
 
 
+def getMenu():
+    i = 0
+    menu = ''
+    for li in menuDiv.findAll('li', attrs={'class': 'menu-li dinner-li'}):
+        # menu += '<<<' + stations[i] + '>>>\n'
+        # i += 1
+        for ul in li.findAll('ul', attrs={'class': 'menu-ul'}):
+            for li in ul.findAll('li', attrs={'class': 'item-li dinner-border'}):
+                menu += '-' + li.text + '\n'
+    return menu
+
+
 sns = boto3.client('sns')
 loc = raw_input(
     '\n0 for Crossroads Culinary Center\n1 for Main Street Market Dining Center\n2 for Governors Dining Center\n\nWhich one? ')
@@ -61,15 +72,22 @@ html = response.content
 soup = BeautifulSoup(html)
 menuDiv = soup.find('div', attrs={'id': menuSelect(loc)})
 
-menu = '\nTonight, ' + dayOfWeek(datetime.datetime.today().weekday()) + ' ' + \
-    time.strftime("%m/%d") + ' @ ' + locationSelect(loc) + '\n\n'
+menu = ''
+# menu = '\nTonight, ' + dayOfWeek(datetime.datetime.today().weekday()) + ' ' + \
+#     time.strftime("%m/%d") + ' @ ' + locationSelect(loc) + '\n\n'
 
-for ul in menuDiv.find('ul'):
-    for li in ul.findAll('li', attrs={'class': 'item-li dinner-border'}):
-        menu += '-' + li.text + '\n'
+stations = []
+for ul in menuDiv.find('ul', attrs={'class': 'menu-ul'}):
+    for h5 in menuDiv.findAll('h5', attrs={'class': 'time-of-day dinner-bg'}):
+        if h5.text not in stations:
+            stations.append(h5.text)
 
-menu += '\nText "STOP" to unsubscribe\n' + \
-    time.strftime("%m/%d/%Y") + ' ' + time.strftime("%I:%M:%S %p")
+time.sleep(1)
+
+menu += getMenu()
+
+menu += '\nText "STOP" to unsubscribe\n'
+# time.strftime("%m/%d/%Y") + ' ' + time.strftime("%I:%M:%S %p")
 
 print menu
 
