@@ -1,13 +1,12 @@
+#!/usr/local/bin/env python
+
 import requests
 from BeautifulSoup import BeautifulSoup
 import boto3
 import time
 import datetime
-
-# TODO set an automatic time to run
-# TODO Notifications for certain food
-# TODO Someone signs up after 4pm
-# TODO Switch to new service -- Request Days
+import Tkinter
+from Tkinter import *
 
 
 def dayOfWeek(day):
@@ -23,13 +22,14 @@ def dayOfWeek(day):
     return switcher.get(day, 'DAY_INVALID')
 
 
-def topicSelect(location):
-    switcher = {
-        '0': 'arn:aws:sns:us-west-2:152022601810:C3_Menu',
-        '1': 'arn:aws:sns:us-west-2:152022601810:MS_Menu',
-        '2': 'arn:aws:sns:us-west-2:152022601810:GOV_Menu',
-    }
-    return switcher.get(location, 'arn:aws:sns:us-west-2:152022601810:C3_Menu')
+# def topicSelect(location):
+#     switcher = {
+#         '0': 'arn:aws:sns:us-west-2:152022601810:C3_Menu',
+#         '1': 'arn:aws:sns:us-west-2:152022601810:MS_Menu',
+#         '2': 'arn:aws:sns:us-west-2:152022601810:GOV_Menu',
+#     }
+# return switcher.get(location,
+# 'arn:aws:sns:us-west-2:152022601810:C3_Menu')
 
 
 def menuSelect(location):
@@ -50,45 +50,64 @@ def locationSelect(location):
     return switcher.get(location, 'C3')
 
 
-def getMenu():
+def getMenu(location):
+    response = requests.get('https://myubcard.com/dining/menu')
+    html = response.content
+    soup = BeautifulSoup(html)
+    menuDiv = soup.find('div', attrs={'id': menuSelect(location)})
+    stations = []
+    for ul in menuDiv.find('ul', attrs={'class': 'menu-ul'}):
+        for h5 in menuDiv.findAll('h5', attrs={'class': 'time-of-day dinner-bg'}):
+            if h5.text not in stations:
+                stations.append(h5.text)
     i = 0
     menu = ''
     for li in menuDiv.findAll('li', attrs={'class': 'menu-li dinner-li'}):
-        # menu += '<<<' + stations[i] + '>>>\n'
-        # i += 1
+        menu += '\n<<<' + stations[i] + '>>>\n'
+        i += 1
         for ul in li.findAll('ul', attrs={'class': 'menu-ul'}):
             for li in ul.findAll('li', attrs={'class': 'item-li dinner-border'}):
                 menu += '-' + li.text + '\n'
     return menu
 
 
-sns = boto3.client('sns')
-loc = raw_input(
-    '\n0 for Crossroads Culinary Center\n1 for Main Street Market Dining Center\n2 for Governors Dining Center\n\nWhich one? ')
-arn = topicSelect(loc)
+def createMenu(location):
 
-response = requests.get('https://myubcard.com/dining/menu')
-html = response.content
-soup = BeautifulSoup(html)
-menuDiv = soup.find('div', attrs={'id': menuSelect(loc)})
+    menu = ''
+    menu = '\nTonight, ' + dayOfWeek(datetime.datetime.today().weekday()) + ' ' + \
+        time.strftime("%m/%d") + ' @ ' + locationSelect(location) + '\n'
 
-menu = ''
-# menu = '\nTonight, ' + dayOfWeek(datetime.datetime.today().weekday()) + ' ' + \
-#     time.strftime("%m/%d") + ' @ ' + locationSelect(loc) + '\n\n'
+    menu += getMenu(location)
+    return menu
 
-stations = []
-for ul in menuDiv.find('ul', attrs={'class': 'menu-ul'}):
-    for h5 in menuDiv.findAll('h5', attrs={'class': 'time-of-day dinner-bg'}):
-        if h5.text not in stations:
-            stations.append(h5.text)
 
-time.sleep(1)
+def setMenuArea():
+    enter = str(ButtonLocation.get())
+    menuText.set(createMenu(enter))
 
-menu += getMenu()
+root = Tkinter.Tk()
+root.title("UB Dinner")
+root.minsize(300, 700)
 
-menu += '\nText "STOP" to unsubscribe\n'
-# time.strftime("%m/%d/%Y") + ' ' + time.strftime("%I:%M:%S %p")
 
-print menu
+ButtonLocation = IntVar()
+ButtonLocation.set(0)
 
-sns.publish(TopicArn=arn, Message=menu)
+menuText = StringVar()
+setMenuArea()
+menuView = Label(root, textvariable=menuText)
+
+c3Button = Radiobutton(root, text="C3", value=0,
+                       command=setMenuArea, variable=ButtonLocation)
+c3Button.pack(anchor=W)
+southButton = Radiobutton(root, text="South", value=1,
+                          command=setMenuArea, variable=ButtonLocation)
+southButton.pack(anchor=W)
+govButton = Radiobutton(root, text="Governors", value=2,
+                        command=setMenuArea, variable=ButtonLocation)
+govButton.pack(anchor=W)
+menuView.pack()
+
+c3Button.select()
+
+root.mainloop()
