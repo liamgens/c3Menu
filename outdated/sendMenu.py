@@ -22,16 +22,6 @@ def dayOfWeek(day):
     return switcher.get(day, 'DAY_INVALID')
 
 
-# def topicSelect(location):
-#     switcher = {
-#         '0': 'arn:aws:sns:us-west-2:152022601810:C3_Menu',
-#         '1': 'arn:aws:sns:us-west-2:152022601810:MS_Menu',
-#         '2': 'arn:aws:sns:us-west-2:152022601810:GOV_Menu',
-#     }
-# return switcher.get(location,
-# 'arn:aws:sns:us-west-2:152022601810:C3_Menu')
-
-
 def menuSelect(location):
     switcher = {
         '0': 'menu-56-dinner',
@@ -81,33 +71,33 @@ def createMenu(location):
     return menu
 
 
-def setMenuArea():
-    enter = str(ButtonLocation.get())
-    menuText.set(createMenu(enter))
+# def setMenuArea():
+#     enter = str(ButtonLocation.get())
+#     menuText.set(createMenu(enter))
 
-root = Tkinter.Tk()
-root.title("UB Dinner")
-root.minsize(300, 700)
-
-
-ButtonLocation = IntVar()
-ButtonLocation.set(0)
-
-menuText = StringVar()
-setMenuArea()
-menuView = Label(root, textvariable=menuText)
-
-c3Button = Radiobutton(root, text="C3", value=0,
-                       command=setMenuArea, variable=ButtonLocation)
-c3Button.pack(anchor=W)
-southButton = Radiobutton(root, text="South", value=1,
-                          command=setMenuArea, variable=ButtonLocation)
-southButton.pack(anchor=W)
-govButton = Radiobutton(root, text="Governors", value=2,
-                        command=setMenuArea, variable=ButtonLocation)
-govButton.pack(anchor=W)
-menuView.pack()
-
-c3Button.select()
-
-root.mainloop()
+# root = Tkinter.Tk()
+# root.title("UB Dinner")
+# root.minsize(300, 700)
+#
+#
+# ButtonLocation = IntVar()
+# ButtonLocation.set(0)
+#
+# menuText = StringVar()
+# setMenuArea()
+# menuView = Label(root, textvariable=menuText)
+#
+# c3Button = Radiobutton(root, text="C3", value=0,
+#                        command=setMenuArea, variable=ButtonLocation)
+# c3Button.pack(anchor=W)
+# southButton = Radiobutton(root, text="South", value=1,
+#                           command=setMenuArea, variable=ButtonLocation)
+# southButton.pack(anchor=W)
+# govButton = Radiobutton(root, text="Governors", value=2,
+#                         command=setMenuArea, variable=ButtonLocation)
+# govButton.pack(anchor=W)
+# menuView.pack()
+#
+# c3Button.select()
+#
+# root.mainloop()
